@@ -1,61 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
 public class CounterView : MonoBehaviour
 {
     [SerializeField] private TMP_Text _counterValue;
+    [SerializeField] private Counter _counter;
+    [SerializeField] private InputHandler _input;
 
-    private Counter _counter;
-    private bool _isCounting;
-    private Coroutine _countingRoutine;
-
-    private void Start()
+    private void OnEnable()
     {
-        _counter = new Counter();
-        UpdateView();
+        _counter.OnValueChanged += UpdateView;
+        _input.OnClick += _counter.Toggle;
     }
 
-    private void Update()
+    private void OnDisable()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            ToggleCounting();
-        }
+        _counter.OnValueChanged -= UpdateView;
+        _input.OnClick -= _counter.Toggle;
     }
 
-    private void ToggleCounting()
+    private void UpdateView(int value)
     {
-        _isCounting = !_isCounting;
-
-        if (_isCounting)
-        {
-            _countingRoutine = StartCoroutine(Counting());
-        }
-        else
-        {
-            if (_countingRoutine != null)
-            {
-                StopCoroutine(_countingRoutine);
-                _countingRoutine = null;
-            }
-        }
-    }
-
-    private IEnumerator Counting()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(0.5f);
-
-            _counter.Increase();
-            UpdateView();
-        }
-    }
-
-    private void UpdateView()
-    {
-        _counterValue.text = _counter.Value.ToString();
+        _counterValue.text = value.ToString();
     }
 }
